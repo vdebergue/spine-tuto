@@ -22,13 +22,15 @@ class TaskApp extends Spine.Controller
     "click  .clear": "clear"
 
   elements:
-    ".items": "items"
+    ".items":     "items"
     "form input": "input"
+    "#countVal" : "numero"
 
   constructor: ->
     super
     Task.bind("create",  @addOne)
     Task.bind("refresh", @addAll)
+    Task.bind("refresh change", @renderFooter)
     Task.fetch()
 
   addOne: (task) =>
@@ -46,8 +48,16 @@ class TaskApp extends Spine.Controller
   clear: ->
     Task.destroyDone()
 
+  renderFooter: =>
+    num = Task.active().length
+    @numero.html(num + "")
+
 
 class Tasks extends Spine.Controller
+  events:
+   "change   input[type=checkbox]": "toggle"
+   "click    .destroy":             "destroyItem"
+
   constructor: ->
     super
     @item.bind("update",  @render)
@@ -59,6 +69,13 @@ class Tasks extends Spine.Controller
 
   remove: =>
     @el.remove()
+
+  toggle: ->
+    @item.done = !@item.done
+    @item.save()
+
+  destroyItem: ->
+    @item.destroy()
 
 jQuery ($) ->
   new TaskApp(el: $("#tasks"))
