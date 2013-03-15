@@ -1,7 +1,31 @@
 @(message: String)
 
-@main("Welcome to Play 2.1") {
-    
-    @play20.welcome(message)
-    
+@main("Todo List") {
+
+<div id="views">
+  <div id="tasks">
+    <h1>Todos</h1>
+
+    <form>
+      <input type="text" placeholder="What needs to be done?">
+    </form>
+
+    <div class="items"></div>
+
+    <footer>
+      <a class="clear">Clear completed</a>
+      <div class="count"><span class="countVal"></span> left</div>
+    </footer>
+  </div>
+
+  <script type="text/html" id="taskTemplate">
+    <div class="item {{#done}}done{{/done}}">
+      <div class="view" title="Double click to edit...">
+        <input type="checkbox" {{#done}}checked="checked"{{/done}}>
+        <span>{{name}}</span> <a class="destroy"></a>
+      </div>
+    </div>
+  </script>
+</div>
+
 }
