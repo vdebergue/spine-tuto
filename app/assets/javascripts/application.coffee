@@ -2,7 +2,8 @@ class Task extends Spine.Model
   @configure "Task", "name", "done"
 
   # localstorage:
-  @extend Spine.Model.Local
+  @extend Spine.Model.Ajax
+  @url: "/tasks"
 
   @active: ->
     @select (item) -> !item.done
@@ -16,6 +17,8 @@ class Task extends Spine.Model
 window.Task = Task
 
 class TaskApp extends Spine.Controller
+  @extend Spine.Log
+
   # Add event listeners
   events:
     "submit form":   "create"
@@ -28,6 +31,7 @@ class TaskApp extends Spine.Controller
 
   constructor: ->
     super
+    @log "new App"
     Task.bind("create",  @addOne)
     Task.bind("refresh", @addAll)
     Task.bind("refresh change", @renderFooter)

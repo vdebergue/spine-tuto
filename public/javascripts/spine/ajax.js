@@ -202,6 +202,7 @@
     Singleton.prototype.destroy = function(params, options) {
       return this.ajaxQueue(params, {
         type: 'DELETE',
+        data: "{}",
         url: Ajax.getURL(this.record)
       }).done(this.recordResponse(options)).fail(this.failResponse(options));
     };
