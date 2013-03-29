@@ -1,85 +1,40 @@
-class Task extends Spine.Model
-  @configure "Task", "name", "done"
+define ["controller","model"], (Tasks, Task) ->
+  class TaskApp extends Spine.Controller
+    @extend Spine.Log
 
-  # localstorage:
-  @extend Spine.Model.Ajax
-  @url: "/tasks"
+    # Add event listeners
+    events:
+      "submit form":   "create"
+      "click  .clear": "clear"
 
-  @active: ->
-    @select (item) -> !item.done
+    elements:
+      ".items":     "items"
+      "form input": "input"
+      "#countVal" : "numero"
 
-  @done: ->
-    @select (item) -> !!item.done
+    constructor: ->
+      super
+      @log "new App"
+      Task.bind("create",  @addOne)
+      Task.bind("refresh", @addAll)
+      Task.bind("refresh change", @renderFooter)
+      Task.fetch()
 
-  @destroyDone: ->
-    rec.destroy() for rec in @done()
+    addOne: (task) =>
+      view = new Tasks(item: task)
+      @items.append(view.render().el)
 
-window.Task = Task
+    addAll: =>
+      Task.each(@addOne)
 
-class TaskApp extends Spine.Controller
-  @extend Spine.Log
+    create: (e) ->
+      e.preventDefault()
+      Task.create(name: @input.val())
+      @input.val("")
 
-  # Add event listeners
-  events:
-    "submit form":   "create"
-    "click  .clear": "clear"
+    clear: ->
+      Task.destroyDone()
 
-  elements:
-    ".items":     "items"
-    "form input": "input"
-    "#countVal" : "numero"
-
-  constructor: ->
-    super
-    @log "new App"
-    Task.bind("create",  @addOne)
-    Task.bind("refresh", @addAll)
-    Task.bind("refresh change", @renderFooter)
-    Task.fetch()
-
-  addOne: (task) =>
-    view = new Tasks(item: task)
-    @items.append(view.render().el)
-
-  addAll: =>
-    Task.each(@addOne)
-
-  create: (e) ->
-    e.preventDefault()
-    Task.create(name: @input.val())
-    @input.val("")
-
-  clear: ->
-    Task.destroyDone()
-
-  renderFooter: =>
-    num = Task.active().length
-    @numero.html(num + "")
-
-
-class Tasks extends Spine.Controller
-  events:
-   "change   input[type=checkbox]": "toggle"
-   "click    .destroy":             "destroyItem"
-
-  constructor: ->
-    super
-    @item.bind("update",  @render)
-    @item.bind("destroy", @remove)
-
-  render: =>
-    @html Mustache.render($("#taskTemplate").html(), @item)
-    @
-
-  remove: =>
-    @el.remove()
-
-  toggle: ->
-    @item.done = !@item.done
-    @item.save()
-
-  destroyItem: ->
-    @item.destroy()
-
-jQuery ($) ->
-  new TaskApp(el: $("#tasks"))
+    renderFooter: =>
+      num = Task.active().length
+      @numero.html(num + "")
